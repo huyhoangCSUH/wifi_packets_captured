@@ -1,6 +1,6 @@
 // Server side: receiving data from the clients and input data into Vertica
 #include <stdio.h>
-#include <linux/socket.h>
+#include <sys/socket.h>
 #include <stdlib.h>
 #include <netinet/in.h>
 #include <string.h>
@@ -37,7 +37,7 @@ int main(int argc, char const *argv[])
     address.sin_addr.s_addr = INADDR_ANY;
     address.sin_port = htons( PORT );
       
-    // Forcefully attaching socket to the port 8080
+    // Forcefully attaching socket to the port 
     if (bind(server_fd, (struct sockaddr *)&address, sizeof(address))<0) {
         perror("bind failed");
         exit(EXIT_FAILURE);
