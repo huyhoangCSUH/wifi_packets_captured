@@ -6,10 +6,11 @@
 #include <string.h>
 #include <unistd.h>
 #include <arpa/inet.h>
+#include <sys/types.h>
 
 using namespace::std;
 
-#define PORT 9999
+#define PORT 12345
 #define BUFFER_MAX_SIZE 1024
 
 int main(int argc, char const *argv[])
@@ -27,18 +28,19 @@ int main(int argc, char const *argv[])
         perror("socket failed");
         exit(EXIT_FAILURE);
     }
-      
+    socklen_t optlen = sizeof(opt);  
     // Forcefully attaching socket to the port 
-    if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt))) {
+    if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEPORT, &opt, optlen)) {
         perror("setsockopt");
         exit(EXIT_FAILURE);
     }
+    memset((char*)&address, 0, sizeof(address));
     address.sin_family = AF_INET;
-    address.sin_addr.s_addr = INADDR_ANY;
+    address.sin_addr.s_addr = htonl(INADDR_ANY);
     address.sin_port = htons( PORT );
       
     // Forcefully attaching socket to the port 
-    if (bind(server_fd, (struct sockaddr *)&address, sizeof(address))<0) {
+    if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0) {
         perror("bind failed");
         exit(EXIT_FAILURE);
     }

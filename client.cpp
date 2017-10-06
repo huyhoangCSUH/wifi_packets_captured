@@ -9,7 +9,7 @@
 
 using namespace::std;
 
-#define PORT 9999
+#define PORT 12345
 #define BUFFER_MAX_SIZE 1024
 int main(int argc, char const *argv[])
 {
@@ -27,9 +27,8 @@ int main(int argc, char const *argv[])
         return -1;
     }
   
-    memset(&serv_addr, '0', sizeof(serv_addr));
-  
-    serv_addr.sin_family = AF_INET;
+    memset((char*)&serv_addr, 0, sizeof(serv_addr));
+    serv_addr.sin_family = PF_INET;
     serv_addr.sin_port = htons(PORT);
      
     // Convert IPv4 and IPv6 addresses from text to binary form
@@ -38,12 +37,12 @@ int main(int argc, char const *argv[])
         return -1;
     }
 
-    if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
-        printf("\nConnection Failed \n");
-        return -1;
-    }
+    // if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
+    //     printf("\nConnection Failed \n");
+    //     return -1;
+    // }
     int num_of_bytes_read;
-    while (num_of_bytes_read = getline(&buffer, &buffer_size, stdin)) {
+    while (num_of_bytes_read = getline(&buffer, &buffer_size, stdin)) {        
     	sendto(sock, buffer, num_of_bytes_read, 0, (struct sockaddr *)&serv_addr, sizeof(serv_addr));	
     }
     
