@@ -116,7 +116,7 @@ int main(int argc, char const *argv[])
     int rows_added = 0;
     while(1) {
         bytes_recv = recvfrom(server_fd, buffer, BUFFER_MAX_SIZE, 0, (struct sockaddr *)&remote_addr, &addrlen);        
-        statement = "INSERT INTO network_log VALUES ("
+        statement = "INSERT INTO network_log VALUES (";
         if (bytes_recv > 0) {
             buffer[bytes_recv] = 0;
             //printf("%s\n", buffer);
