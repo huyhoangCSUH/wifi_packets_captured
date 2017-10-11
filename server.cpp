@@ -118,10 +118,10 @@ int main(int argc, char const *argv[])
         bytes_recv = recvfrom(server_fd, buffer, BUFFER_MAX_SIZE, 0, (struct sockaddr *)&remote_addr, &addrlen);        
         statement = "INSERT INTO network_log VALUES (";
         if (bytes_recv > 0) {
-            buffer[bytes_recv] = 0;
+            buffer[bytes_recv] = ')';
+            buffer[bytes_recv + 1] = 0;
             //printf("%s\n", buffer);
-            statement.append(buffer);
-            statement.append(")");
+            statement += buffer;
             ret = SQLExecDirect(hdlStmt, (SQLTCHAR*) &statement, SQL_NTS);
             if(!SQL_SUCCEEDED(ret)) { 
                 printf("A row rejected!\n");
