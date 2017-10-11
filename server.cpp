@@ -44,25 +44,96 @@ int main(int argc, char const *argv[])
         perror("bind failed");
         exit(EXIT_FAILURE);
     }
-    // if (listen(server_fd, 3) < 0) {
-    //     perror("listen");
-    //     exit(EXIT_FAILURE);
-    // }
-    // if ((new_socket = accept(server_fd, (struct sockaddr *)&address, 
-    //                    (socklen_t*)&addrlen))<0) {
-    //     perror("accept");
-    //     exit(EXIT_FAILURE);
-    // }
+    /*
+    *
+    *   Data import part
+    *
+    */
+    SQLRETURN ret;   // Stores return value from ODBC API calls
+    SQLHENV hdlEnv;  // Handle for the SQL environment object
+    // Allocate an a SQL environment object
+    ret = SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &hdlEnv); 
+    if(!SQL_SUCCEEDED(ret)) {
+        printf("Could not allocate a handle.\n");
+        exit(EXIT_FAILURE);
+    } else {
+        printf("Allocated an environment handle.\n");
+    }
+    // Set the ODBC version we are going to use to 
+    // 3.
+    ret = SQLSetEnvAttr(hdlEnv, SQL_ATTR_ODBC_VERSION, (SQLPOINTER) SQL_OV_ODBC3, SQL_IS_UINTEGER);
+    if(!SQL_SUCCEEDED(ret)) {
+         printf("Could not set application version to ODBC 3.\n");
+         exit(EXIT_FAILURE);
+    } else {
+         printf("Set application version to ODBC 3.\n");
+    }
+    // Allocate a database handle.
+    SQLHDBC hdlDbc;
+     ret = SQLAllocHandle(SQL_HANDLE_DBC, hdlEnv, &hdlDbc); 
+     if(!SQL_SUCCEEDED(ret)) {
+          printf("Could not allocate database handle.\n");
+          exit(EXIT_FAILURE);
+     } else {
+          printf("Allocated Database handle.\n");
+     }
+    // Connect to the database using 
+    // SQL Connect
+    printf("Connecting to database.\n");
+    const char *dsnName = "mydsn";
+    const char* userID = "vertica";
+    const char* passwd = "12512Marlive";
+    ret = SQLConnect(hdlDbc, (SQLCHAR*)dsnName, SQL_NTS,(SQLCHAR*)userID,SQL_NTS,
+        (SQLCHAR*)passwd, SQL_NTS);
+    if(!SQL_SUCCEEDED(ret)) {
+        printf("Could not connect to database.\n");
+        exit(EXIT_FAILURE);
+    } else {
+        printf("Connected to the database.\n");
+    }
+    // Disable autocommit to boost inserting speed
+    printf("Disabling autocommit.\n");
+    ret = SQLSetConnectAttr(hdlDbc, SQL_ATTR_AUTOCOMMIT, SQL_AUTOCOMMIT_OFF, SQL_NTS);
+    if(!SQL_SUCCEEDED(ret)) {
+        printf("Could not disable autocommit.\n");
+        exit(EXIT_FAILURE);
+    }
+    // This part is for executing SQL queries
+    // Set up a statement handle
+    SQLHSTMT hdlStmt;
+    SQLAllocHandle(SQL_HANDLE_STMT, hdlDbc, &hdlStmt);
+    assert(SQL_SUCCEEDED(ret)); 
+    
+    // Start listening and receiving data
+    printf("Start listening: %s\n", buffer);
+    string statement;
+    int rows_added = 0;
     while(1) {
-        bytes_recv = recvfrom(server_fd, buffer, BUFFER_MAX_SIZE, 0, (struct sockaddr *)&remote_addr, &addrlen);
-        // printf("Received %d bytes\n", bytes_recv);
+        bytes_recv = recvfrom(server_fd, buffer, BUFFER_MAX_SIZE, 0, (struct sockaddr *)&remote_addr, &addrlen);        
+        statement = "INSERT INTO network_log VALUES ("
         if (bytes_recv > 0) {
             buffer[bytes_recv] = 0;
-            printf("Message received: %s\n", buffer);
+            //printf("%s\n", buffer);
+            statement.append(buffer);
+            statement.append(")");
+            ret = SQLExecDirect(hstmt, (SQLTCHAR*) &statement, SQL_NTS);
+            if(!SQL_SUCCEEDED(ret)) { 
+                printf("A row rejected!\n");
+            } else {
+                rows_added++;
+                // Commit manually after 1000 rows inserted
+                if (rows_added >= 1000) {
+                    ret = SQLEndTran(SQL_HANDLE_DBC, hdlDbc, SQL_COMMIT);
+                    if(!SQL_SUCCEEDED(ret)) {
+                        printf("Could not commit transaction\n");                        
+                    }  else {
+                        printf("Committed transaction\n");
+                    }
+                }
+            }
+
         }
     }
-    // printf("%s\n",buffer );
-    // send(new_socket , hello , strlen(hello) , 0 );
-    // printf("Hello message sent\n");
+   
     return 0;
 }
