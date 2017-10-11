@@ -124,7 +124,7 @@ int main(int argc, char const *argv[])
             statement += buffer;
             ret = SQLExecDirect(hdlStmt, (SQLTCHAR*) &statement, SQL_NTS);
             if(!SQL_SUCCEEDED(ret)) { 
-                printf("A row rejected!\n");
+                printf("A row rejected: %s\n",statement.c_str());
             } else {
                 rows_added++;
                 // Commit manually after 1000 rows inserted
