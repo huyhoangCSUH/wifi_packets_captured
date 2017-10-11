@@ -122,7 +122,7 @@ int main(int argc, char const *argv[])
             //printf("%s\n", buffer);
             statement.append(buffer);
             statement.append(")");
-            ret = SQLExecDirect(hstmt, (SQLTCHAR*) &statement, SQL_NTS);
+            ret = SQLExecDirect(hdlStmt, (SQLTCHAR*) &statement, SQL_NTS);
             if(!SQL_SUCCEEDED(ret)) { 
                 printf("A row rejected!\n");
             } else {
