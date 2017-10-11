@@ -7,6 +7,12 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <sys/types.h>
+#include <assert.h>
+#include <sstream>
+// Standard ODBC headers
+#include <sql.h>
+#include <sqlext.h>
+#include <sqltypes.h>
 
 using namespace::std;
 
