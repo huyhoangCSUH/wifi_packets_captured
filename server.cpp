@@ -160,18 +160,27 @@ int main(int argc, char const *argv[])
             rows_added++;
             if (rows_added >= 10000) {                
                 fout.close();
-                printf("Importing 1000 rows!\n");
-                rename("data.csv", "archive/data_to_import.csv");
+                printf("Prepare to import 10000 rows!\n");
+                if(rename("data.csv", "archive/data_to_import.csv"));
                 ret = SQLExecDirect(hdlStmt, (SQLTCHAR*) "COPY TABLE network_log "
                     "FROM '/home/vertica/huy/wifi_packets_captured/archive/data_to_import.csv' "
                     "DELIMITER ',' ENCLOSED BY '\"' REJECTED DATA AS TABLE loader_rejects DIRECT", SQL_NTS);
+                
                 if (notSuccess(ret)) { 
-                    printf("Data was not imported!");
+                    printf("Data was not imported!\n");
                 } else {
                     SQLLEN numRows;
                     ret = SQLRowCount(hdlStmt, &numRows);
                     printf("Successfully added %ld rows!\n", numRows);
                 }
+
+                // Removing file after import
+                if (remove(archive/data_to_import.csv) != 0) {
+                    printf("Error deleting file!\n", );
+                } else {
+                    printf("File deleted sucessfully!\n");
+                }
+                
                 ret = SQLEndTran(SQL_HANDLE_DBC, hdlDbc, SQL_COMMIT);
                 if(!SQL_SUCCEEDED(ret)) {
                     printf("Could not commit transaction\n");                        
