@@ -14,6 +14,7 @@
 #include <sqlext.h>
 #include <sqltypes.h>
 #include <fstream>
+#include <iostream>
 
 using namespace::std;
 
@@ -162,11 +163,11 @@ int main(int argc, char const *argv[])
                 fout.close();
                 printf("Prepare to import 10000 rows!\n");
                 if(rename("data.csv", "archive/data_to_import.csv"));
-                copyString = "COPY network_log "
-                    "FROM '/home/vertica/huy/wifi_packets_captured/archive/data_to_import.csv' "
-                    "DELIMITER ',' ENCLOSED BY '\"' DIRECT";
+                
                 cout << copyString << endl;
-                ret = SQLExecDirect(hdlStmt, (SQLTCHAR*) copyString, SQL_NTS);
+                ret = SQLExecDirect(hdlStmt, (SQLTCHAR*) "COPY network_log "
+                    "FROM '/home/vertica/huy/wifi_packets_captured/archive/data_to_import.csv' "
+                    "DELIMITER ',' ENCLOSED BY '\"' DIRECT", SQL_NTS);
                 
                 if (notSuccess(ret)) { 
                     printf("Data was not imported!\n");
