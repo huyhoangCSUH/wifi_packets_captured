@@ -172,14 +172,17 @@ int main(int argc, char const *argv[])
                     SQLLEN numRows;
                     ret = SQLRowCount(hdlStmt, &numRows);
                     printf("Successfully added %ld rows!\n", numRows);
+                    
+                    if (remove("archive/data_to_import.csv") != 0) {
+                        printf("Error deleting file!\n");
+                    } else {
+                        printf("File deleted sucessfully!\n");
+                    }
                 }
 
                 // Removing file after import
-                if (remove("archive/data_to_import.csv") != 0) {
-                    printf("Error deleting file!\n");
-                } else {
-                    printf("File deleted sucessfully!\n");
-                }
+                
+
                 
                 ret = SQLEndTran(SQL_HANDLE_DBC, hdlDbc, SQL_COMMIT);
                 if(!SQL_SUCCEEDED(ret)) {
