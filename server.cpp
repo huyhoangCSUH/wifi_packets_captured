@@ -212,6 +212,6 @@ void StringPrepareForVertica(string& raw_string, int num_of_cols, int last_col_m
         last_col_char_count++;
     }
     raw_string.erase(i, 500);  
-    raw_string += '\n';
+    raw_string += "\"\n";
 
 };
