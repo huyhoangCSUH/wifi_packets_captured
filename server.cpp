@@ -152,7 +152,7 @@ int main(int argc, char const *argv[])
 
         }
         */
-        
+        string copyString;
         if (bytes_recv > 0) {
             string buffer_str(buffer);
             StringPrepareForVertica(buffer_str, 6, 30);
@@ -162,9 +162,9 @@ int main(int argc, char const *argv[])
                 fout.close();
                 printf("Prepare to import 10000 rows!\n");
                 if(rename("data.csv", "archive/data_to_import.csv"));
-                string copyString = "COPY network_log "
+                copyString = "COPY network_log "
                     "FROM '/home/vertica/huy/wifi_packets_captured/archive/data_to_import.csv' "
-                    "DELIMITER ',' ENCLOSED BY '\"' REJECTED DATA AS TABLE loader_rejects DIRECT";
+                    "DELIMITER ',' ENCLOSED BY '\"' DIRECT";
                 cout << copyString << endl;
                 ret = SQLExecDirect(hdlStmt, (SQLTCHAR*) copyString, SQL_NTS);
                 
