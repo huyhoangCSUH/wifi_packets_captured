@@ -162,9 +162,11 @@ int main(int argc, char const *argv[])
                 fout.close();
                 printf("Prepare to import 10000 rows!\n");
                 if(rename("data.csv", "archive/data_to_import.csv"));
-                ret = SQLExecDirect(hdlStmt, (SQLTCHAR*) "COPY TABLE network_log "
+                string copyString = "COPY network_log "
                     "FROM '/home/vertica/huy/wifi_packets_captured/archive/data_to_import.csv' "
-                    "DELIMITER ',' ENCLOSED BY '\"' REJECTED DATA AS TABLE loader_rejects DIRECT", SQL_NTS);
+                    "DELIMITER ',' ENCLOSED BY '\"' REJECTED DATA AS TABLE loader_rejects DIRECT";
+                cout << copyString << endl;
+                ret = SQLExecDirect(hdlStmt, (SQLTCHAR*) , SQL_NTS);
                 
                 if (notSuccess(ret)) { 
                     printf("Data was not imported!\n");
@@ -172,7 +174,7 @@ int main(int argc, char const *argv[])
                     SQLLEN numRows;
                     ret = SQLRowCount(hdlStmt, &numRows);
                     printf("Successfully added %ld rows!\n", numRows);
-                    
+
                     if (remove("archive/data_to_import.csv") != 0) {
                         printf("Error deleting file!\n");
                     } else {
