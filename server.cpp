@@ -13,6 +13,7 @@
 #include <sql.h>
 #include <sqlext.h>
 #include <sqltypes.h>
+#include <fstream>
 
 using namespace::std;
 
@@ -20,7 +21,9 @@ using namespace::std;
 #define BUFFER_MAX_SIZE 1024
 
 void StringPrepareForVertica(string& raw_string, int num_of_cols, int last_col_max_char);
-
+bool notSuccess(SQLRETURN ret) {
+    return (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO);
+}
 int main(int argc, char const *argv[])
 {
     int server_fd, new_socket, valread;
