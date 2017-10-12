@@ -175,8 +175,8 @@ int main(int argc, char const *argv[])
                 }
 
                 // Removing file after import
-                if (remove(archive/data_to_import.csv) != 0) {
-                    printf("Error deleting file!\n", );
+                if (remove("archive/data_to_import.csv") != 0) {
+                    printf("Error deleting file!\n");
                 } else {
                     printf("File deleted sucessfully!\n");
                 }
