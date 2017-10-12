@@ -116,19 +116,21 @@ int main(int argc, char const *argv[])
     printf("Start listening: %s\n", buffer);
     string statement;
     int rows_added = 0;
+    ofstream fout("data.csv", "w");
     while(1) {
         bytes_recv = recvfrom(server_fd, buffer, BUFFER_MAX_SIZE, 0, (struct sockaddr *)&remote_addr, &addrlen);        
-        statement = "INSERT INTO network_log VALUES (";
+        //statement = "INSERT INTO network_log VALUES (";
+        /*
         if (bytes_recv > 0) {
             string buffer_str(buffer);
             StringPrepareForVertica(buffer_str, 6, 30);
             // buffer[bytes_recv] = ')';
             // buffer[bytes_recv + 1] = 0;
             // printf("%s\n", buffer);
-            statement += buffer_str;
-            statement += ")";
+            //statement += buffer_str;
+            //statement += ")";
             ret = SQLExecDirect(hdlStmt, (SQLTCHAR*) &statement, SQL_NTS);
-            if(!SQL_SUCCEEDED(ret)) { 
+            if (!SQL_SUCCEEDED(ret)) { 
                 printf("A row rejected: %s\n",statement.c_str());
             } else {
                 rows_added++;
@@ -144,6 +146,37 @@ int main(int argc, char const *argv[])
                 }
             }
 
+        }
+        */
+        
+        if (bytes_recv > 0) {
+            string buffer_str(buffer);
+            StringPrepareForVertica(buffer_str, 6, 30);
+            fout << buffer_str;
+            rows_added++;
+            if (rows_added >= 1000) {                
+                fout.close();
+                printf("Importing 1000 rows!\n");
+                rename("data.csv", "archive/data_to_import.csv");
+                ret = SQLExecDirect(hdlStmt, (SQLTCHAR*) "COPY TABLE network_log "
+                    "FROM '/home/vertica/huy/wifi_packets_captured/archive/data_to_import.csv' "
+                    "DELIMITER ',' ENCLOSED BY '\"' REJECTED DATA AS TABLE loader_rejects DIRECT", SQL_NTS);
+                if (notSuccess(ret)) { 
+                    printf("Data was not imported!");
+                } else {
+                    SQLLEN numRows;
+                    ret = SQLRowCount(hdlStmt, &numRows);
+                    printf("Successfully added %d rows!\n", numRows);
+                }
+                ret = SQLEndTran(SQL_HANDLE_DBC, hdlDbc, SQL_COMMIT);
+                if(!SQL_SUCCEEDED(ret)) {
+                    printf("Could not commit transaction\n");                        
+                }  else {
+                    printf("Committed transaction\n");
+                }
+                fout.open("data.csv", "w");
+
+            }
         }
     }   
     return 0;
@@ -167,11 +200,13 @@ void StringPrepareForVertica(string& raw_string, int num_of_cols, int last_col_m
     int last_col_char_count = 0; 
     int i = last_pos_of_comma + 1;
     while (last_col_char_count < last_col_max_char && raw_string.at(i) != '\0') {
-        if (raw_string.at(i) == ',' || raw_string.at(i) == '\"' )
+        //if (raw_string.at(i) == ',' || raw_string.at(i) == '\"' )
+        if (raw_string.at(i) == ',')    
             raw_string.erase(i, 1); 
         i++;
         last_col_char_count++;
     }
     raw_string.erase(i, 100);  
+    raw_string += '\n';
 
 };
