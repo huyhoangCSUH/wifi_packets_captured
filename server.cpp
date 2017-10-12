@@ -166,7 +166,7 @@ int main(int argc, char const *argv[])
                     "FROM '/home/vertica/huy/wifi_packets_captured/archive/data_to_import.csv' "
                     "DELIMITER ',' ENCLOSED BY '\"' REJECTED DATA AS TABLE loader_rejects DIRECT";
                 cout << copyString << endl;
-                ret = SQLExecDirect(hdlStmt, (SQLTCHAR*) , SQL_NTS);
+                ret = SQLExecDirect(hdlStmt, (SQLTCHAR*) copyString, SQL_NTS);
                 
                 if (notSuccess(ret)) { 
                     printf("Data was not imported!\n");
