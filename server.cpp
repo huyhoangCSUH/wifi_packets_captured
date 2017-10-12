@@ -24,6 +24,7 @@ void StringPrepareForVertica(string& raw_string, int num_of_cols, int last_col_m
 bool notSuccess(SQLRETURN ret) {
     return (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO);
 }
+
 int main(int argc, char const *argv[])
 {
     int server_fd, new_socket, valread;
@@ -119,7 +120,7 @@ int main(int argc, char const *argv[])
     printf("Start listening: %s\n", buffer);
     string statement;
     int rows_added = 0;
-    ofstream fout("data.csv", "w");
+    ofstream fout("data.csv");
     while(1) {
         bytes_recv = recvfrom(server_fd, buffer, BUFFER_MAX_SIZE, 0, (struct sockaddr *)&remote_addr, &addrlen);        
         //statement = "INSERT INTO network_log VALUES (";
@@ -169,7 +170,7 @@ int main(int argc, char const *argv[])
                 } else {
                     SQLLEN numRows;
                     ret = SQLRowCount(hdlStmt, &numRows);
-                    printf("Successfully added %d rows!\n", numRows);
+                    printf("Successfully added %ld rows!\n", numRows);
                 }
                 ret = SQLEndTran(SQL_HANDLE_DBC, hdlDbc, SQL_COMMIT);
                 if(!SQL_SUCCEEDED(ret)) {
@@ -177,7 +178,7 @@ int main(int argc, char const *argv[])
                 }  else {
                     printf("Committed transaction\n");
                 }
-                fout.open("data.csv", "w");
+                fout.open("data.csv");
 
             }
         }
