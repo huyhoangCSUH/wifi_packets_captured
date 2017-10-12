@@ -121,7 +121,7 @@ int main(int argc, char const *argv[])
         statement = "INSERT INTO network_log VALUES (";
         if (bytes_recv > 0) {
             string buffer_str(buffer);
-            StringPrepareForVertica(buffer, 6, 30);
+            StringPrepareForVertica(buffer_str, 6, 30);
             // buffer[bytes_recv] = ')';
             // buffer[bytes_recv + 1] = 0;
             // printf("%s\n", buffer);
@@ -157,7 +157,7 @@ void StringPrepareForVertica(string& raw_string, int num_of_cols, int last_col_m
     for (int i = 0; i < raw_string.size(); ++i) {        
         if (raw_string.at(i) == ',') {
             comma_count++;
-            cout << comma_count << endl;
+            //cout << comma_count << endl;
             if (comma_count == num_of_cols - 1) {
                 last_pos_of_comma = i;
                 break;
@@ -166,11 +166,13 @@ void StringPrepareForVertica(string& raw_string, int num_of_cols, int last_col_m
     }
     int last_col_char_count = 0; 
     int i = last_pos_of_comma + 1;
-    while (last_col_char_count < last_col_max_char) {
+    while (last_col_char_count < last_col_max_char && raw_string.at(i) != 0) {
         if (raw_string.at(i) == ',' || raw_string.at(i) == '\"' )
             raw_string.erase(i, 1); 
         i++;
         last_col_char_count++;
     }
-    raw_string.erase(i, 100);    
+    if (raw_string.at(i) != 0)
+        raw_string.erase(i, 100);  
+      
 };
