@@ -158,7 +158,7 @@ int main(int argc, char const *argv[])
             StringPrepareForVertica(buffer_str, 6, 30);
             fout << buffer_str;
             rows_added++;
-            if (rows_added >= 1000) {                
+            if (rows_added >= 10000) {                
                 fout.close();
                 printf("Importing 1000 rows!\n");
                 rename("data.csv", "archive/data_to_import.csv");
@@ -178,6 +178,7 @@ int main(int argc, char const *argv[])
                 }  else {
                     printf("Committed transaction\n");
                 }
+                rows_added = 0;
                 fout.open("data.csv");
 
             }
@@ -210,7 +211,7 @@ void StringPrepareForVertica(string& raw_string, int num_of_cols, int last_col_m
         i++;
         last_col_char_count++;
     }
-    raw_string.erase(i, 100);  
+    raw_string.erase(i, 500);  
     raw_string += '\n';
 
 };
