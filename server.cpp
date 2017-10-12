@@ -19,6 +19,8 @@ using namespace::std;
 #define PORT 12345
 #define BUFFER_MAX_SIZE 1024
 
+void StringPrepareForVertica(string& raw_string, int num_of_cols, int last_col_max_char);
+
 int main(int argc, char const *argv[])
 {
     int server_fd, new_socket, valread;
@@ -118,10 +120,13 @@ int main(int argc, char const *argv[])
         bytes_recv = recvfrom(server_fd, buffer, BUFFER_MAX_SIZE, 0, (struct sockaddr *)&remote_addr, &addrlen);        
         statement = "INSERT INTO network_log VALUES (";
         if (bytes_recv > 0) {
-            buffer[bytes_recv] = ')';
-            buffer[bytes_recv + 1] = 0;
-            //printf("%s\n", buffer);
-            statement += buffer;
+            string buffer_str(buffer);
+            StringPrepareForVertica(buffer, 6, 30);
+            // buffer[bytes_recv] = ')';
+            // buffer[bytes_recv + 1] = 0;
+            // printf("%s\n", buffer);
+            statement += buffer_str;
+            statement += ")";
             ret = SQLExecDirect(hdlStmt, (SQLTCHAR*) &statement, SQL_NTS);
             if(!SQL_SUCCEEDED(ret)) { 
                 printf("A row rejected: %s\n",statement.c_str());
@@ -133,13 +138,39 @@ int main(int argc, char const *argv[])
                     if(!SQL_SUCCEEDED(ret)) {
                         printf("Could not commit transaction\n");                        
                     }  else {
-                        printf("Committed transaction\n");
+                        printf("Committed 1000 records\n");
                     }
+                    rows_added = 0;
                 }
             }
 
         }
-    }
-   
+    }   
     return 0;
 }
+
+void StringPrepareForVertica(string& raw_string, int num_of_cols, int last_col_max_char) {    
+    // This function is to trim the last column to the size of table's column        
+    string output_string;    
+    int last_pos_of_comma = 0;        
+    int comma_count = 0;
+    for (int i = 0; i < raw_string.size(); ++i) {        
+        if (raw_string.at(i) == ',') {
+            comma_count++;
+            cout << comma_count << endl;
+            if (comma_count == num_of_cols - 1) {
+                last_pos_of_comma = i;
+                break;
+            }
+        }
+    }
+    int last_col_char_count = 0; 
+    int i = last_pos_of_comma + 1;
+    while (last_col_char_count < last_col_max_char) {
+        if (raw_string.at(i) == ',' || raw_string.at(i) == '\"' )
+            raw_string.erase(i, 1); 
+        i++;
+        last_col_char_count++;
+    }
+    raw_string.erase(i, 100);    
+};
