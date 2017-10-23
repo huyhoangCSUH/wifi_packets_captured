@@ -1,4 +1,4 @@
 *
 !.gitignore
-!server.cpp
+!server*.cpp
 !client.cpp
