@@ -6,7 +6,7 @@ To compile  server_postgres.cpp:
 g++ -I/usr/include/postgresql -L/usr/lib server_postgres.cpp -o server_pg -lpq
 ```
 
-To compile server_verica.cpp:
+To compile server_vertica.cpp:
 ```
-g++ 
+g++ server_vertica.cpp -o server_vertica -lodbc
 ```

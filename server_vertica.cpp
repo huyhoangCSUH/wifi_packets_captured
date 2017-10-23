@@ -121,11 +121,12 @@ int main(int argc, char const *argv[])
     // Start listening and receiving data
     printf("Start listening: %s\n", buffer);
     string statement;
-    int rows_added = 0;
+    int rows_count = 0;
     ofstream fout("data.csv");
     double frequency = 60.0;   // import data every 60 seconds
     time_t start, end;
     time(&start);
+
     double timediff;
     while(1) {
         bytes_recv = recvfrom(server_fd, buffer, BUFFER_MAX_SIZE, 0, (struct sockaddr *)&remote_addr, &addrlen);        
@@ -135,11 +136,12 @@ int main(int argc, char const *argv[])
             string buffer_str(buffer);
             StringPrepareForVertica(buffer_str, 6, 30);
             fout << buffer_str;
+            rows_count++;
             time(&end);
             timediff = difftime(end, start);
             if ( timediff >= frequency) {                
                 fout.close();
-                printf("Prepare to import 10000 rows!\n");
+                printf("Prepare to import %d rows!\n", rows_count);
                 if(rename("data.csv", "archive/data_to_import.csv"));
                 
                 cout << copyString << endl;
@@ -159,11 +161,9 @@ int main(int argc, char const *argv[])
                     } else {
                         printf("File deleted sucessfully!\n");
                         time(&start);
+                        rows_count = 0;
                     }
-                }
-
-                // Removing file after import               
-
+                }                
                 
                 ret = SQLEndTran(SQL_HANDLE_DBC, hdlDbc, SQL_COMMIT);
                 if(!SQL_SUCCEEDED(ret)) {
@@ -171,7 +171,7 @@ int main(int argc, char const *argv[])
                 }  else {
                     printf("Committed transaction\n");
                 }
-                rows_added = 0;
+                
                 fout.open("data.csv");
 
             }
