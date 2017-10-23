@@ -9,10 +9,7 @@
 #include <sys/types.h>
 #include <assert.h>
 #include <sstream>
-// Standard ODBC headers
-#include <sql.h>
-#include <sqlext.h>
-#include <sqltypes.h>
+
 #include <fstream>
 #include <iostream>
 // For libpq
@@ -27,9 +24,7 @@ using namespace::std;
 #define BUFFER_MAX_SIZE 1024
 
 void StringPrepareForPostgres(string& raw_string, int num_of_cols, int last_col_max_char);
-bool notSuccess(SQLRETURN ret) {
-    return (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO);
-}
+
 static void exit_nicely(PGconn *conn) {
     PQfinish(conn);
     exit(1);
@@ -155,12 +150,12 @@ void StringPrepareForPostgres(string& raw_string, int num_of_cols, int last_col_
     int i = last_pos_of_comma + 1;
     while (last_col_char_count < last_col_max_char && raw_string.at(i) != '\0') {
         //if (raw_string.at(i) == ',' || raw_string.at(i) == '\"' )
-        if (raw_string.at(i) == ',')    
+        if (raw_string.at(i) == ',' || raw_string.at(i) == '\n' || raw_string.at(i) == '\r')    
             raw_string.erase(i, 1); 
         i++;
         last_col_char_count++;
     }
     raw_string.erase(i, 500);  
-    raw_string += "\"\n";
+    raw_string += "\n";
 
 };
