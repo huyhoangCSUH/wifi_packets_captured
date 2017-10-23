@@ -100,7 +100,7 @@ int main(int argc, char const *argv[])
         string copyString;
         if (bytes_recv > 0) {
             string buffer_str(buffer);
-            StringPrepareForVertica(buffer_str, 6, 30);
+            StringPrepareForPostgres(buffer_str, 6, 30);
             fout << buffer_str;
             end = clock();
             //rows_added++;
