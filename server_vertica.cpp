@@ -15,6 +15,7 @@
 #include <sqltypes.h>
 #include <fstream>
 #include <iostream>
+#include <time.h>
 
 using namespace::std;
 
@@ -122,6 +123,10 @@ int main(int argc, char const *argv[])
     string statement;
     int rows_added = 0;
     ofstream fout("data.csv");
+    double frequency = 60.0;   // import data every 60 seconds
+    time_t start, end;
+    time(&start);
+    double timediff;
     while(1) {
         bytes_recv = recvfrom(server_fd, buffer, BUFFER_MAX_SIZE, 0, (struct sockaddr *)&remote_addr, &addrlen);        
         
@@ -130,8 +135,9 @@ int main(int argc, char const *argv[])
             string buffer_str(buffer);
             StringPrepareForVertica(buffer_str, 6, 30);
             fout << buffer_str;
-            rows_added++;
-            if (rows_added >= 10000) {                
+            time(&end);
+            timediff = difftime(end, start);
+            if ( timediff >= frequency) {                
                 fout.close();
                 printf("Prepare to import 10000 rows!\n");
                 if(rename("data.csv", "archive/data_to_import.csv"));
@@ -152,11 +158,11 @@ int main(int argc, char const *argv[])
                         printf("Error deleting file!\n");
                     } else {
                         printf("File deleted sucessfully!\n");
+                        time(&start);
                     }
                 }
 
-                // Removing file after import
-                
+                // Removing file after import               
 
                 
                 ret = SQLEndTran(SQL_HANDLE_DBC, hdlDbc, SQL_COMMIT);
@@ -199,6 +205,6 @@ void StringPrepareForVertica(string& raw_string, int num_of_cols, int last_col_m
         last_col_char_count++;
     }
     raw_string.erase(i, 500);  
-    raw_string += "\"\n";
+    raw_string += "\n";
 
 };
